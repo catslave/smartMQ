@@ -35,11 +35,11 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="1.7">
-      <module name="brokerPro" target="1.5" />
-      <module name="netty" target="1.5" />
-      <module name="producerPro" target="1.5" />
-      <module name="remotingPro" target="1.5" />
-      <module name="rocketmq" target="1.5" />
+      <module name="brokerPro" target="1.7" />
+      <module name="netty" target="1.7" />
+      <module name="producerPro" target="1.7" />
+      <module name="remotingPro" target="1.7" />
+      <module name="rocketmq" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>
