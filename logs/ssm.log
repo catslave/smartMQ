@@ -1,0 +1,4 @@
+[WARN] [2016-09-01 16:26:13][io.netty.bootstrap.Bootstrap]Unknown channel option: SO_BACKLOG=1024
+[WARN] [2016-09-01 16:28:55][io.netty.bootstrap.Bootstrap]Unknown channel option: SO_BACKLOG=1024
+[ERROR] [2016-09-01 16:28:58][io.netty.util.ResourceLeakDetector]LEAK: ByteBuf.release() was not called before it's garbage-collected. Enable advanced leak reporting to find out where the leak occurred. To enable advanced leak reporting, specify the JVM option '-Dio.netty.leakDetectionLevel=advanced' or call ResourceLeakDetector.setLevel() See http://netty.io/wiki/reference-counted-objects.html for more information.
+[WARN] [2016-09-01 16:30:04][io.netty.bootstrap.Bootstrap]Unknown channel option: SO_BACKLOG=1024

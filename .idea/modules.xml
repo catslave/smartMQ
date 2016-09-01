@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/brokerPro/brokerPro.iml" filepath="$PROJECT_DIR$/brokerPro/brokerPro.iml" />
+      <module fileurl="file://$PROJECT_DIR$/netty/netty.iml" filepath="$PROJECT_DIR$/netty/netty.iml" />
+      <module fileurl="file://$PROJECT_DIR$/producerPro/producerPro.iml" filepath="$PROJECT_DIR$/producerPro/producerPro.iml" />
+      <module fileurl="file://$PROJECT_DIR$/remotingPro/remotingPro.iml" filepath="$PROJECT_DIR$/remotingPro/remotingPro.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rocketmq.iml" filepath="$PROJECT_DIR$/rocketmq.iml" />
+    </modules>
+  </component>
+</project>
