@@ -12,6 +12,10 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * Broker 服务端
  * Created by Administrator on 2016/9/1.
@@ -24,6 +28,8 @@ public class BrokerRemotingServer {
     private NioEventLoopGroup workerGroup;
     //监听端口
     private int port = 10911;
+    //消息队列
+    private List<String> messages = new ArrayList<>();
 
     public BrokerRemotingServer() {
         this.serverBootstrap = new ServerBootstrap();
@@ -80,7 +86,23 @@ public class BrokerRemotingServer {
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, RemotingProCommand msg) throws Exception {
             System.out.println("receive the message");
-            System.out.println(new String(msg.getHeader()) + ":" + new String(msg.getBody()));
+
+            if(msg.getHeader().length == 0) {
+                //拉取消息
+                for(String message : messages) {
+                    RemotingProCommand remotingProCommand = new RemotingProCommand();
+                    remotingProCommand.setBody(message.getBytes());
+                    ctx.write(remotingProCommand);
+                    System.out.println("consume message: " + message);
+                }
+                ctx.flush();
+                messages.clear();
+            } else {
+                //发送消息
+                messages.add(new String(msg.getBody()));
+                System.out.println(new String(msg.getHeader()) + ":" + new String(msg.getBody()));
+            }
+
         }
 
         @Override

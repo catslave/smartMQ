@@ -17,6 +17,5 @@ public class RemotingEncoder extends MessageToByteEncoder<RemotingProCommand> {
     protected void encode(ChannelHandlerContext ctx, RemotingProCommand msg, ByteBuf out) throws Exception {
         ByteBuffer byteBuffer = msg.encode();
         out.writeBytes(byteBuffer);
-        ctx.flush();
     }
 }

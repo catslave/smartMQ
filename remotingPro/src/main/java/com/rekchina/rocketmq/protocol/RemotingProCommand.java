@@ -11,6 +11,8 @@ public class RemotingProCommand implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
+    private CommandType commandType;
+
     private byte[] header;
 
     private byte[] body;
@@ -31,6 +33,14 @@ public class RemotingProCommand implements Serializable {
         this.body = body;
     }
 
+    public CommandType getCommandType() {
+        return commandType;
+    }
+
+    public void setCommandType(CommandType commandType) {
+        this.commandType = commandType;
+    }
+
     /**
      * encode RemotingProCommand to ByteBuffer
      * @return
@@ -43,6 +53,7 @@ public class RemotingProCommand implements Serializable {
         ByteBuffer byteBuffer = ByteBuffer.allocate(length);
 
         byteBuffer.putInt(this.header.length);
+        byteBuffer.put(this.getCommandType().toString().getBytes());
         byteBuffer.put(this.header);
         byteBuffer.put(this.body);
 
