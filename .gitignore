@@ -2,3 +2,6 @@
 logs
 target
 *.iml
+
+# 如果已经把要删除的文件commit了，再加入gitignore是无效的，需要先删除缓存
+# git rm -r --cached .idea logs target
