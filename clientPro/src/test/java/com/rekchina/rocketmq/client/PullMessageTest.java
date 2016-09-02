@@ -12,6 +12,7 @@ public class PullMessageTest {
     public static void main(String[] args) {
         DefaultMQConsumer consumer = new DefaultMQConsumer("consumer");
         consumer.start();
+        consumer.subscribe("Topic-b");
         consumer.pull();
     }
 

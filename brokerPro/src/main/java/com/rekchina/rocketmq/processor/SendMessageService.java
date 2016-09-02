@@ -21,9 +21,8 @@ public class SendMessageService implements RemotingProcessor {
 
     @Override
     public void processRequest(ChannelHandlerContext ctx, RemotingProCommand remotingProCommand) {
-//        System.out.println("SEND_MESSAGE");
         Message message = RemotingSerializable.fromJson(new String(remotingProCommand.getBody()), Message.class);
-        brokerController.addMessage(message);
+        brokerController.addMessage(message.getTopic(), message);
         System.out.println("append message:");
         System.out.println(new String(remotingProCommand.getHeader()) + ":" + new String(remotingProCommand.getBody()));
     }

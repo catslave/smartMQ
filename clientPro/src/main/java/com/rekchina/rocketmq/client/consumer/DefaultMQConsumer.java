@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultMQConsumer {
 
     private String consumerName;
+    private String subTopics;
     private ProducerRemotingClient producerRemotingClient;
     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -31,6 +32,14 @@ public class DefaultMQConsumer {
     public void start() {
         this.producerRemotingClient = new ProducerRemotingClient(new DefaultRequestProcessor());
         this.producerRemotingClient.start();
+    }
+
+    /**
+     * subscribe topics
+     * @param topic
+     */
+    public void subscribe(String topic) {
+        this.subTopics = topic;
     }
 
     /**
@@ -50,5 +59,9 @@ public class DefaultMQConsumer {
 
     public ProducerRemotingClient getProducerRemotingClient() {
         return producerRemotingClient;
+    }
+
+    public String getSubTopics() {
+        return subTopics;
     }
 }

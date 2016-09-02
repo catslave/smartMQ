@@ -24,7 +24,7 @@ public class PullMessageService implements RemotingProcessor {
     public void processRequest(ChannelHandlerContext ctx, RemotingProCommand remotingProCommand) {
 //        System.out.println("PULL_MESSAGE");
         //拉取消息
-        Message message = brokerController.getMessage();
+        Message message = brokerController.getMessage(new String(remotingProCommand.getHeader()));
         if(message == null) {
             return;
         }

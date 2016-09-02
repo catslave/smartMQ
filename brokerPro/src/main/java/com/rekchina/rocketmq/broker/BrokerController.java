@@ -6,6 +6,7 @@ import com.rekchina.rocketmq.processor.PullMessageService;
 import com.rekchina.rocketmq.processor.SendMessageService;
 import com.rekchina.rocketmq.protocol.CommandType;
 
+import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -19,7 +20,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class BrokerController {
 
     //消息队列
-    private BlockingQueue<Message> messageBlockingQueue = new LinkedBlockingDeque<>();
+    private HashMap<String/* topic */, BlockingQueue<Message>/* messageQueue */> messageBlockingQueue = new HashMap<>();
 
     /**
      * Start the Broker Server
@@ -35,17 +36,26 @@ public class BrokerController {
         brokerRemotingServer.start();
     }
 
-    public void addMessage(Message message) {
+    public void addMessage(String topic, Message message) {
         try {
-            messageBlockingQueue.put(message);
+            BlockingQueue<Message> messages = messageBlockingQueue.get(topic);
+            if(messages == null) {
+                messages = new LinkedBlockingDeque<>();
+            }
+            messages.put(message);
+            messageBlockingQueue.put(topic, messages);
         } catch (InterruptedException e) {
             System.out.println("add message failed");
             e.printStackTrace();
         }
     }
 
-    public Message getMessage() {
-        return messageBlockingQueue.poll();
+    public Message getMessage(String topic) {
+        BlockingQueue<Message> messages = messageBlockingQueue.get(topic);
+        if(messages == null) {
+            return null;
+        }
+        return messages.poll();
     }
 
 }
