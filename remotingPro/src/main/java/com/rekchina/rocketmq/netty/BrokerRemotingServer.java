@@ -1,13 +1,16 @@
-package com.rekchina.rocketmq.broker;
+package com.rekchina.rocketmq.netty;
 
+import com.alibaba.rocketmq.remoting.protocol.RemotingCommand;
 import com.rekchina.rocketmq.netty.RemotingDecoder;
 import com.rekchina.rocketmq.netty.RemotingEncoder;
+import com.rekchina.rocketmq.protocol.CommandType;
 import com.rekchina.rocketmq.protocol.RemotingProCommand;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.marshalling.CompatibleMarshallingDecoder;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
@@ -28,8 +31,8 @@ public class BrokerRemotingServer {
     private NioEventLoopGroup workerGroup;
     //监听端口
     private int port = 10911;
-    //消息队列
-    private List<String> messages = new ArrayList<>();
+    // Processors
+    private HashMap<CommandType, RemotingProcessor> processorTable = new HashMap<>();
 
     public BrokerRemotingServer() {
         this.serverBootstrap = new ServerBootstrap();
@@ -43,8 +46,10 @@ public class BrokerRemotingServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        socketChannel.pipeline().addLast(new RemotingEncoder());
-                        socketChannel.pipeline().addLast(new RemotingDecoder());
+//                        socketChannel.pipeline().addLast(new RemotingEncoder());
+//                        socketChannel.pipeline().addLast(new RemotingDecoder());
+                        socketChannel.pipeline().addLast(new ObjectDecoder(1024, ClassResolvers.weakCachingConcurrentResolver(this.getClass().getClassLoader())));
+                        socketChannel.pipeline().addLast(new ObjectEncoder());
                         socketChannel.pipeline().addLast(new BrokerServerHandler());
                     }
                 });
@@ -73,6 +78,15 @@ public class BrokerRemotingServer {
     }
 
     /**
+     * register processor
+     * @param commandType
+     * @param remotingProcessor
+     */
+    public void register(CommandType commandType, RemotingProcessor remotingProcessor) {
+        this.processorTable.put(commandType, remotingProcessor);
+    }
+
+    /**
      * Handles a server-side channel.
      */
     class BrokerServerHandler extends SimpleChannelInboundHandler<RemotingProCommand> {
@@ -86,29 +100,17 @@ public class BrokerRemotingServer {
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, RemotingProCommand msg) throws Exception {
             System.out.println("receive the message");
+            RemotingProcessor remotingProcessor = processorTable.get(msg.getCommandType());
+            remotingProcessor.processRequest(ctx, msg);
 
-            if(msg.getHeader().length == 0) {
-                //拉取消息
-                for(String message : messages) {
-                    RemotingProCommand remotingProCommand = new RemotingProCommand();
-                    remotingProCommand.setBody(message.getBytes());
-                    ctx.write(remotingProCommand);
-                    System.out.println("consume message: " + message);
-                }
-                ctx.flush();
-                messages.clear();
-            } else {
-                //发送消息
-                messages.add(new String(msg.getBody()));
-                System.out.println(new String(msg.getHeader()) + ":" + new String(msg.getBody()));
-            }
 
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             // Close the connection when an exception is raised.
-            cause.printStackTrace();
+//            cause.printStackTrace();
+            System.out.println("The client collection is closed");
             ctx.close();
         }
     }

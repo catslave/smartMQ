@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>producerPro</artifactId>
+    <artifactId>clientPro</artifactId>
 
     <dependencies>
         <!-- 引用Netty作为服务端通信 -->

@@ -15,6 +15,7 @@ public class RemotingProCommand implements Serializable {
 
     private byte[] header;
 
+    // Store the message
     private byte[] body;
 
     public byte[] getHeader() {

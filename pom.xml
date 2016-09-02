@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>producerPro</module>
+        <module>clientPro</module>
         <module>netty</module>
         <module>remotingPro</module>
         <module>brokerPro</module>
