@@ -1,5 +1,7 @@
 package com.rekchina.rocketmq.store;
 
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 
 /**
@@ -29,4 +31,5 @@ public class ConsumeQueue {
         }
         return offsetsTable.get(topic);
     }
+
 }

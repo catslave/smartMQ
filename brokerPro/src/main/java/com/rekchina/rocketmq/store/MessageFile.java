@@ -14,10 +14,10 @@ import java.io.RandomAccessFile;
  */
 public class MessageFile {
 
-    private final File file;
-    private final RandomAccessFile randomAccessFile;
+    private File file;
+    private RandomAccessFile randomAccessFile;
     private final int MESSAGE_SIZE = 128; // 消息大小
-    private String storePath = "brokerPro/target/store/";// 消息存储路径
+    private String storePath = "brokerPro/target/store/commitlog/";// 消息存储路径
 
     public MessageFile(String fileName) throws FileNotFoundException {
         this.file = new File(this.storePath + fileName);
