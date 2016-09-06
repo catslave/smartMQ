@@ -14,7 +14,10 @@ public class ProducerProTest {
         DefaultMQProducer producer = new DefaultMQProducer("Producer");
         producer.start();//要在线程里面启动，否则会同步等待，后面的代码没办法执行
 
-        Message message = new Message("Topic-a", "hello broker".getBytes());
-        producer.send(message);
+        for(int i = 0; i < 10; i++) {
+            Message message = new Message("Topic-a", ("hello broker " + i).getBytes());
+            producer.send(message);
+        }
+
     }
 }

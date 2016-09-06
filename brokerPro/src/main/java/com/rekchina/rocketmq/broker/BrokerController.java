@@ -6,6 +6,7 @@ import com.rekchina.rocketmq.processor.PullMessageService;
 import com.rekchina.rocketmq.processor.SendMessageService;
 import com.rekchina.rocketmq.protocol.CommandType;
 import com.rekchina.rocketmq.store.ConsumeQueue;
+import com.rekchina.rocketmq.store.ConsumeQueueManage;
 import com.rekchina.rocketmq.store.MessageFile;
 
 import java.io.FileNotFoundException;
@@ -13,7 +14,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Broker控制器
@@ -27,7 +32,21 @@ public class BrokerController {
     // 消息存储文件
     private MessageFile messageFile;
     // 消费进度列表
-    private HashMap<String/* consumerName */, ConsumeQueue> consumeQueueTable = new HashMap<>();
+    private ConsumeQueue consumeQueue = new ConsumeQueue();
+    private ConsumeQueueManage consumeQueueManage;
+    // 定时将消费进度刷盘到文件中
+    private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+    public BrokerController() {
+        try {
+            this.consumeQueueManage = new ConsumeQueueManage(this);
+            this.consumeQueueManage.load();
+
+            scheduledExecutorService.scheduleAtFixedRate(new ConsumeQueueService(), 0, 5000, TimeUnit.MILLISECONDS);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Start the Broker Server
@@ -92,12 +111,7 @@ public class BrokerController {
      * @return
      */
     public int getConsumeOffsetStore(String consumer, String topic) {
-        ConsumeQueue consumeQueue = this.consumeQueueTable.get(consumer);
-        if(consumeQueue == null) {
-            consumeQueue = new ConsumeQueue();
-            this.consumeQueueTable.put(consumer, consumeQueue);
-        }
-        return consumeQueue.getConsumeOffsetStore(topic);
+        return this.consumeQueue.getConsumeOffsetStore(topic, consumer);
     }
 
     /**
@@ -107,9 +121,27 @@ public class BrokerController {
      * @param offset
      */
     public void updateConsumeOffsetStore(String consumer, String topic, int offset) {
-        ConsumeQueue consumeQueue = this.consumeQueueTable.get(consumer);
         offset++;
-        consumeQueue.updateConsumeOffsetStore(topic, offset);
+        this.consumeQueue.updateConsumeOffsetStore(topic, consumer, offset);
     }
 
+    public ConsumeQueue getConsumeQueue() {
+        return consumeQueue;
+    }
+
+    public void setConsumeQueue(ConsumeQueue consumeQueue) {
+        this.consumeQueue = consumeQueue;
+    }
+
+    public ConsumeQueueManage getConsumeQueueManage() {
+        return consumeQueueManage;
+    }
+
+    class ConsumeQueueService implements Runnable {
+
+        @Override
+        public void run() {
+            BrokerController.this.getConsumeQueueManage().persist();
+        }
+    }
 }

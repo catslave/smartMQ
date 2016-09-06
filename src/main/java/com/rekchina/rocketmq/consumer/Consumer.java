@@ -23,7 +23,7 @@ public class Consumer {
         try {
             //订阅PushTopic下Tag为push的消息
 //            consumer.subscribe("PushTopic", "push");
-            consumer.subscribe("PRO_1", "push");
+            consumer.subscribe("PushTopic-5", "push");
             //程序第一次启动从消息队列头取数据
             consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
             consumer.registerMessageListener(new MessageListenerConcurrently() {
