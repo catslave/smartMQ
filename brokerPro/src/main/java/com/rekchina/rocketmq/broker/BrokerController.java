@@ -5,8 +5,13 @@ import com.rekchina.rocketmq.netty.Message;
 import com.rekchina.rocketmq.processor.PullMessageService;
 import com.rekchina.rocketmq.processor.SendMessageService;
 import com.rekchina.rocketmq.protocol.CommandType;
+import com.rekchina.rocketmq.store.ConsumeQueue;
+import com.rekchina.rocketmq.store.MessageFile;
 
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -19,8 +24,10 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class BrokerController {
 
-    //消息队列
-    private HashMap<String/* topic */, BlockingQueue<Message>/* messageQueue */> messageBlockingQueue = new HashMap<>();
+    // 消息存储文件
+    private MessageFile messageFile;
+    // 消费进度列表
+    private HashMap<String/* consumerName */, ConsumeQueue> consumeQueueTable = new HashMap<>();
 
     /**
      * Start the Broker Server
@@ -36,26 +43,73 @@ public class BrokerController {
         brokerRemotingServer.start();
     }
 
+    /**
+     * 新增消息
+     * @param topic
+     * @param message
+     */
     public void addMessage(String topic, Message message) {
+        // 保存到消息文件
         try {
-            BlockingQueue<Message> messages = messageBlockingQueue.get(topic);
-            if(messages == null) {
-                messages = new LinkedBlockingDeque<>();
-            }
-            messages.put(message);
-            messageBlockingQueue.put(topic, messages);
-        } catch (InterruptedException e) {
-            System.out.println("add message failed");
+            messageFile = new MessageFile(topic);
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        messageFile.appendMessage(message);
     }
 
-    public Message getMessage(String topic) {
-        BlockingQueue<Message> messages = messageBlockingQueue.get(topic);
-        if(messages == null) {
-            return null;
+    /**
+     * 获取消息
+     * @param topic 主题
+     * @param offset 消费进度
+     * @return
+     */
+    public Message getMessage(String topic, int offset) {
+        // 从文件中读消息
+        try {
+            messageFile = new MessageFile(topic);
+            Message message = messageFile.getMessage(offset);
+            return message;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-        return messages.poll();
+        return null;
+    }
+
+    /**
+     * 获取消息
+     * @param topic
+     * @return
+     */
+    public Message getMessage(String topic) {
+        return getMessage(topic, 0);
+    }
+
+    /**
+     * 获取消费进度
+     * @param consumer
+     * @param topic
+     * @return
+     */
+    public int getConsumeOffsetStore(String consumer, String topic) {
+        ConsumeQueue consumeQueue = this.consumeQueueTable.get(consumer);
+        if(consumeQueue == null) {
+            consumeQueue = new ConsumeQueue();
+            this.consumeQueueTable.put(consumer, consumeQueue);
+        }
+        return consumeQueue.getConsumeOffsetStore(topic);
+    }
+
+    /**
+     * 更新消费进度
+     * @param consumer
+     * @param topic
+     * @param offset
+     */
+    public void updateConsumeOffsetStore(String consumer, String topic, int offset) {
+        ConsumeQueue consumeQueue = this.consumeQueueTable.get(consumer);
+        offset++;
+        consumeQueue.updateConsumeOffsetStore(topic, offset);
     }
 
 }

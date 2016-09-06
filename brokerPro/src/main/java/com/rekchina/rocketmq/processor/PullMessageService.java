@@ -22,12 +22,24 @@ public class PullMessageService implements RemotingProcessor {
 
     @Override
     public void processRequest(ChannelHandlerContext ctx, RemotingProCommand remotingProCommand) {
-//        System.out.println("PULL_MESSAGE");
-        //拉取消息
-        Message message = brokerController.getMessage(new String(remotingProCommand.getHeader()));
+        // 拉取消息
+        String header = new String(remotingProCommand.getHeader());
+        String topic = header.split("@")[0];
+        String consumerName = header.split("@")[1];
+
+        // 获取消费进度
+        int offsetStore = this.brokerController.getConsumeOffsetStore(consumerName, topic);
+
+        // 获取消息
+        Message message = brokerController.getMessage(topic, offsetStore);
         if(message == null) {
             return;
         }
+
+        // 更新消费进度
+        this.brokerController.updateConsumeOffsetStore(consumerName, topic, offsetStore);
+
+        // 返回消息
         RemotingProCommand responseCommand = new RemotingProCommand();
         responseCommand.setCommandType(CommandType.PULL_MESSAGE);
         responseCommand.setBody(RemotingSerializable.toJson(message).getBytes());

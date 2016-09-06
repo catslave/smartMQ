@@ -20,7 +20,7 @@ public class PullMessageService implements Runnable {
         System.out.println("execute pull message service");
         RemotingProCommand request = new RemotingProCommand();
         request.setCommandType(CommandType.PULL_MESSAGE);
-        request.setHeader(defaultMQConsumer.getSubTopics().getBytes());
+        request.setHeader((this.defaultMQConsumer.getSubTopics() + "@" + this.defaultMQConsumer.getConsumerName()).getBytes());
 
         this.defaultMQConsumer.getProducerRemotingClient().invoke(request);
     }
