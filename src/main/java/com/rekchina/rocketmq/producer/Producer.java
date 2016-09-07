@@ -13,7 +13,7 @@ import com.alibaba.rocketmq.remoting.exception.RemotingException;
 public class Producer {
 
     public static void main(String[] args) {
-        DefaultMQProducer producer = new DefaultMQProducer("Producer");
+        DefaultMQProducer producer = new DefaultMQProducer("Producer-0907");
 //        producer.setNamesrvAddr("172.19.0.89:9876");
         producer.setNamesrvAddr("112.124.50.158:9876");
 //        producer.setInstanceName("t1");
@@ -33,7 +33,7 @@ public class Producer {
 //            producer2.start();
 //
             //发送第一条测试消息
-            Message message = new Message("PushTopic-5", "push", "1", "Just for test.".getBytes());
+            Message message = new Message("PushTopic-090702", "push", "1", "Just for test.".getBytes());
             SendResult result = producer.send(message);
             System.out.println("id:" + result.getMsgId() + ", result:" + result.getSendStatus());
 //
